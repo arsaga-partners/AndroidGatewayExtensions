@@ -18,18 +18,16 @@ abstract class AbstractApiClient<IApiType> {
             chain
                 .request()
                 .newBuilder()
-                .also {
-                    setAuthorizeHeader(it)
-                }
+                .let { setAuthorizeHeader(it) }
                 .build().let {
                     chain.proceed(it)
                 }
         }
     }
 
-    protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder)
+    protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder
 
-    protected abstract fun setRefreshToken(requestBuilder: Request.Builder)
+    protected abstract fun setRefreshToken(requestBuilder: Request.Builder): Request.Builder
 
     private val authenticator by lazy {
         object : Authenticator {
@@ -39,7 +37,7 @@ abstract class AbstractApiClient<IApiType> {
             ): Request? = response
                     .request
                     .newBuilder()
-                    .also { setRefreshToken(it) }
+                    .let { setRefreshToken(it) }
                     .build()
         }
     }
@@ -54,14 +52,14 @@ abstract class AbstractApiClient<IApiType> {
         }
     }
 
-    protected open fun adjustOkHttpClient(okHttpClientBuilder: OkHttpClient.Builder) {}
+    protected open fun adjustOkHttpClient(okHttpClientBuilder: OkHttpClient.Builder): OkHttpClient.Builder = okHttpClientBuilder
 
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .debugLog()
         .addInterceptor(authorizeInterceptor)
         .authenticator(authenticator)
         .cache(null)
-        .also { adjustOkHttpClient(it) }
+        .let { adjustOkHttpClient(it) }
         .build()
 
     protected val retrofitApiBuilder: Retrofit by lazy { Retrofit
