@@ -9,7 +9,7 @@ abstract class AbstractApiClient<IApiType> {
 
     protected abstract val baseUrl: String
 
-    protected abstract val isDebug: Boolean
+    protected abstract fun isDebug(): Boolean
 
     protected abstract val jsonConverterFactory: Converter.Factory
 
@@ -43,7 +43,7 @@ abstract class AbstractApiClient<IApiType> {
     }
 
     private fun OkHttpClient.Builder.debugLog(): OkHttpClient.Builder = this.apply {
-        if (isDebug) {
+        if (isDebug()) {
             addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
