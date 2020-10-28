@@ -5,6 +5,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import kotlin.math.max
+import timber.log.Timber
 
 abstract class AbstractApiClient<IApiType> {
 
@@ -41,7 +42,10 @@ abstract class AbstractApiClient<IApiType> {
                 route: Route?,
                 response: Response
             ): Request? = response
-                .takeIf { maxRetryCount > it.retryCount() }
+                .takeIf { it.retryCount().run {
+                    Timber.d("Auth::refreshTokenRetryCount${this}")
+                    maxRetryCount > this
+                } }
                 ?.request
                 ?.newBuilder()
                 ?.let { setRefreshToken(it) }
