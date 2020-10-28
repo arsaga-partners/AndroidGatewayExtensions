@@ -1,11 +1,13 @@
 package jp.co.arsaga.extensions.gateway
 
+import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
-import kotlin.math.max
 import timber.log.Timber
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.suspendCoroutine
 
 abstract class AbstractApiClient<IApiType> {
 
@@ -29,7 +31,7 @@ abstract class AbstractApiClient<IApiType> {
 
     protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder
 
-    protected abstract fun setRefreshToken(requestBuilder: Request.Builder): Request.Builder
+    protected abstract fun setRefreshToken(continuation: Continuation<Request.Builder>, requestBuilder: Request.Builder): Request.Builder
 
     protected abstract val maxRetryCount: Int
 
@@ -48,7 +50,11 @@ abstract class AbstractApiClient<IApiType> {
                 } }
                 ?.request
                 ?.newBuilder()
-                ?.let { setRefreshToken(it) }
+                ?.let { builder -> runBlocking {
+                    suspendCoroutine<Request.Builder> {
+                        setRefreshToken(it, builder)
+                    }
+                } }
                 ?.build()
         }
     }
