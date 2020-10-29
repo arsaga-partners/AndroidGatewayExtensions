@@ -31,7 +31,7 @@ abstract class AbstractApiClient<IApiType> {
 
     protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder
 
-    protected abstract fun setRefreshToken(continuation: Continuation<Request.Builder>, requestBuilder: Request.Builder): Request.Builder
+    protected abstract fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder?
 
     protected abstract val maxRetryCount: Int
 
@@ -51,7 +51,7 @@ abstract class AbstractApiClient<IApiType> {
                 ?.request
                 ?.newBuilder()
                 ?.let { builder -> runBlocking {
-                    suspendCoroutine<Request.Builder> {
+                    suspendCoroutine<Request.Builder?> {
                         setRefreshToken(it, builder)
                     }
                 } }
