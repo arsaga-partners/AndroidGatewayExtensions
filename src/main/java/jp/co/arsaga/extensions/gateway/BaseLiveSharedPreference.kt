@@ -3,10 +3,39 @@ package jp.co.arsaga.extensions.gateway
 import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 
+class LiveIntPreference(
+    sharedPreference: SharedPreferences,
+    key: String,
+) : BaseLiveSharedPreference<Int>(sharedPreference, key, 0) {
+    override fun get(
+        sharedPreferences: SharedPreferences,
+        key: String, defaultValue: Int
+    ): Int = sharedPreferences.getInt(key, defaultValue)
+
+    override fun register(value: Int) {
+        sharedPreference.edit().putInt(key, defaultValue).apply()
+    }
+}
+
+class LiveStringPreference(
+    sharedPreference: SharedPreferences,
+    key: String,
+) : BaseLiveSharedPreference<String>(sharedPreference, key, "") {
+    override fun get(
+        sharedPreferences: SharedPreferences,
+        key: String,
+        defaultValue: String
+    ): String = sharedPreferences.getString(key, defaultValue) ?: defaultValue
+
+    override fun register(value: String) {
+        sharedPreference.edit().putString(key, defaultValue).apply()
+    }
+}
+
 abstract class BaseLiveSharedPreference<T : Any>(
     protected val sharedPreference: SharedPreferences,
-    private val key: String,
-    private val defaultValue: T
+    protected val key: String,
+    protected val defaultValue: T
 ) : MutableLiveData<T>() {
 
     private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
