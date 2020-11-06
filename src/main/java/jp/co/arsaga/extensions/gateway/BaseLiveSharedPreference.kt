@@ -3,7 +3,7 @@ package jp.co.arsaga.extensions.gateway
 import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 
-class LiveIntPreference(
+open class LiveIntPreference(
     sharedPreference: SharedPreferences,
     key: String,
 ) : BaseLiveSharedPreference<Int>(sharedPreference, key, 0) {
@@ -17,7 +17,7 @@ class LiveIntPreference(
     }
 }
 
-class LiveStringPreference(
+open class LiveStringPreference(
     sharedPreference: SharedPreferences,
     key: String,
 ) : BaseLiveSharedPreference<String>(sharedPreference, key, "") {
