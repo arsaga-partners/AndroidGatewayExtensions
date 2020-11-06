@@ -1,14 +1,13 @@
 package jp.co.arsaga.extensions.gateway
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 abstract class BaseLiveSharedPreference<T : Any>(
+    protected val sharedPreference: SharedPreferences,
     private val key: String,
     private val defaultValue: T
-) : LiveData<T>() {
-
-    protected abstract val sharedPreference: SharedPreferences
+) : MutableLiveData<T>() {
 
     private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
         if (this.key == key) get(sharedPreferences, key, defaultValue)
@@ -17,9 +16,15 @@ abstract class BaseLiveSharedPreference<T : Any>(
 
     protected abstract fun get(sharedPreferences: SharedPreferences, key: String, defaultValue: T): T
 
-    abstract fun put(value: T)
+    protected abstract fun register(value: T)
 
-    fun delete() {
+    override fun setValue(value: T?) {
+        super.setValue(value)
+        if (value == null) delete()
+        else register(value)
+    }
+
+    private fun delete() {
         sharedPreference.edit().remove(key).apply()
     }
 
@@ -32,6 +37,5 @@ abstract class BaseLiveSharedPreference<T : Any>(
     override fun onInactive() {
         sharedPreference.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         super.onInactive()
-        value = null
     }
 }
