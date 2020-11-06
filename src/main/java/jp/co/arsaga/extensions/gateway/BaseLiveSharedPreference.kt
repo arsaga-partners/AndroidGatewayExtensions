@@ -13,7 +13,7 @@ open class LiveIntPreference(
     ): Int = sharedPreferences.getInt(key, defaultValue)
 
     override fun register(value: Int) {
-        sharedPreference.edit().putInt(key, defaultValue).apply()
+        sharedPreference.edit().putInt(key, value).apply()
     }
 }
 
@@ -28,7 +28,7 @@ open class LiveStringPreference(
     ): String = sharedPreferences.getString(key, defaultValue) ?: defaultValue
 
     override fun register(value: String) {
-        sharedPreference.edit().putString(key, defaultValue).apply()
+        sharedPreference.edit().putString(key, value).apply()
     }
 }
 
