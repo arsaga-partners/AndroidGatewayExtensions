@@ -66,11 +66,9 @@ abstract class AbstractApiClient<IApiType> {
 
     private fun OkHttpClient.Builder.debugLog(): OkHttpClient.Builder = this.apply {
         if (isDebug()) {
-            addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            )
+            HttpLoggingInterceptor()
+                .apply { level = HttpLoggingInterceptor.Level.BODY }
+                .run(::addInterceptor)
         }
     }
 
