@@ -77,11 +77,11 @@ abstract class AbstractApiClient<IApiType> {
     protected open fun adjustOkHttpClient(okHttpClientBuilder: OkHttpClient.Builder): OkHttpClient.Builder = okHttpClientBuilder
 
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .debugLog()
         .addInterceptor(authorizeInterceptor)
         .authenticator(authenticator)
         .cache(null)
         .let { adjustOkHttpClient(it) }
+        .debugLog()
         .build()
 
     protected val retrofitApiBuilder: Retrofit by lazy { Retrofit
