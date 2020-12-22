@@ -66,22 +66,20 @@ abstract class AbstractApiClient<IApiType> {
 
     private fun OkHttpClient.Builder.debugLog(): OkHttpClient.Builder = this.apply {
         if (isDebug()) {
-            addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            )
+            HttpLoggingInterceptor()
+                .apply { level = HttpLoggingInterceptor.Level.BODY }
+                .run(::addInterceptor)
         }
     }
 
     protected open fun adjustOkHttpClient(okHttpClientBuilder: OkHttpClient.Builder): OkHttpClient.Builder = okHttpClientBuilder
 
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .debugLog()
         .addInterceptor(authorizeInterceptor)
         .authenticator(authenticator)
         .cache(null)
         .let { adjustOkHttpClient(it) }
+        .debugLog()
         .build()
 
     protected val retrofitApiBuilder: Retrofit by lazy { Retrofit
