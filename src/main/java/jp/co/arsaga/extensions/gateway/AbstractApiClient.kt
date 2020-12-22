@@ -29,9 +29,9 @@ abstract class AbstractApiClient<IApiType> {
         }
     }
 
-    protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder
+    protected open fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder = requestBuilder
 
-    protected abstract fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder?
+    protected open fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder? = requestBuilder
 
     protected abstract val maxRetryCount: Int
 
