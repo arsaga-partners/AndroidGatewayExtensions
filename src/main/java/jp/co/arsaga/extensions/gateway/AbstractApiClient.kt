@@ -29,25 +29,30 @@ abstract class AbstractApiClient<IApiType> {
         }
     }
 
-    protected abstract fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder
+    protected open fun setAuthorizeHeader(requestBuilder: Request.Builder): Request.Builder = requestBuilder
 
-    protected abstract fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder?
+    protected open fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder? = requestBuilder
+
+    protected open fun onTokenRefreshError() {}
 
     protected abstract val maxRetryCount: Int
 
     private val authenticator by lazy {
         object : Authenticator {
-            private fun Response.retryCount(): Int = generateSequence(priorResponse) { it.priorResponse }
-                .count()
-
             override fun authenticate(
                 route: Route?,
                 response: Response
             ): Request? = response
-                .takeIf { it.retryCount().run {
-                    Timber.d("Auth::refreshTokenRetryCount${this}")
-                    maxRetryCount > this
-                } }
+                .let {
+                    val retryCount = generateSequence(it.priorResponse) { it.priorResponse }.count()
+                    Timber.d("Auth::refreshTokenRetryCount${retryCount}")
+                    if (maxRetryCount > retryCount) it
+                    else {
+                        Timber.d("Auth::refreshTokenError")
+                        onTokenRefreshError()
+                        null
+                    }
+                }
                 ?.request
                 ?.newBuilder()
                 ?.let { builder -> runBlocking {
