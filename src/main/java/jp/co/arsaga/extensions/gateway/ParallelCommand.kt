@@ -1,10 +1,7 @@
 package jp.co.arsaga.extensions.gateway
 
 import androidx.lifecycle.LiveData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class ParallelCommand(
@@ -29,9 +26,7 @@ class ParallelCommand(
         command: suspend (() -> Unit) -> Unit
     ): () -> Unit = {
         runBlocking {
-            command(
-                onSuccess()
-            )
+            command(onSuccess())
         }
     }
 
@@ -64,12 +59,11 @@ class ParallelCommand(
         fun run(
             list: List<() -> Unit>,
             onComplete: () -> Unit
-        ) = runBlocking(Dispatchers.Default) {
+        ) = GlobalScope.launch(Dispatchers.Default) {
             list
                 .map { async { it() } }
                 .awaitAll()
                 .run { onComplete() }
-
         }
     }
 }
