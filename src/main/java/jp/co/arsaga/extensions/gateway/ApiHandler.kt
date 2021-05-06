@@ -16,7 +16,7 @@ data class ApiContext<Res, Req>(
 
 class LocalRequestErrorException : Exception()
 
-open class ApiDispatchCommand<Res, Req>(
+abstract class ApiDispatchCommand<Res, Req>(
     private val apiCall: (suspend () -> Response<Res>)?,
     private val apiContext: ApiContext<Res, Req>,
 ) {
