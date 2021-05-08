@@ -114,9 +114,11 @@ abstract class AbstractTransitionCallbackHandler : Application.ActivityLifecycle
                     else -> onNext()
                 }
             }
-        } ?: run {
-            isHandling.set(false)
-            callbackDeque.addFirst(callback)
-        }
+        } ?: run { rollback(callback) }
+    }
+
+    private fun rollback(callback: (Activity) -> Unit) {
+        callbackDeque.addFirst(callback)
+        isHandling.set(false)
     }
 }
