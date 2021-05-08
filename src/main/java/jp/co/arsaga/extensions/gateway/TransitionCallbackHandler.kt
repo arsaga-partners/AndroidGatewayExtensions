@@ -85,11 +85,7 @@ abstract class AbstractTransitionCallbackHandler : Application.ActivityLifecycle
     private fun execute() {
         fun start() {
             callbackDeque.pollFirst()?.run {
-                handler.post {
-                    transition(this) {
-                        start()
-                    }
-                }
+                handler.post { transition(this, ::start) }
             } ?: run {
                 isHandling.set(false)
             }
