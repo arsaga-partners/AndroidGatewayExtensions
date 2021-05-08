@@ -66,9 +66,9 @@ abstract class AbstractTransitionCallbackHandler : Application.ActivityLifecycle
     /**
      * @param callback
      * 画面遷移を実行するラムダ。
-     * 第二引数を実行すると直近最大10件分の画面遷移ラムダ式のメソッド名リストを取得できる
+     * 第二引数を実行すると直近最大${maxSize}件分の画面遷移ラムダ式のメソッド名リストを取得できる
      */
-    fun post(callback: (Activity, successCallbackName: () -> List<String>) -> Unit) {
+    fun post(callback: (Activity, successCallbackNameList: () -> List<String>) -> Unit) {
         post { activity ->
             callback(activity) { successCallbackNameQueue.toList() }
         }
