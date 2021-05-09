@@ -106,12 +106,18 @@ abstract class AbstractTransitionCallbackHandler : Application.ActivityLifecycle
                 onNext()
             }.onFailure {
                 Timber.e(it)
-                when (it) { // Todo:動作中断の必要があるExceptionを適宜追加していく
+                when (it) {
+                    ::isSuspend -> rollback(callback)
                     else -> onNext()
                 }
             }
         } ?: run { rollback(callback) }
     }
+
+    // FIXME:動作中断の必要があるExceptionを適宜追加していく
+    private fun isSuspend(
+        throwable: Throwable
+    ): Boolean = false
 
     private fun rollback(callback: (Activity) -> Unit) {
         callbackDeque.addFirst(callback)
