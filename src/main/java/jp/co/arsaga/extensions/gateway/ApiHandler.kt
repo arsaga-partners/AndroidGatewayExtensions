@@ -17,7 +17,7 @@ data class ApiContext<Res, Req>(
 class LocalRequestErrorException : Exception()
 
 abstract class ApiDispatchCommand<Res, Req>(
-    private val apiCall: (suspend () -> Response<Res>)?,
+    private val apiCall: (Req?) -> (suspend () -> Response<Res>)?,
     private val apiContext: ApiContext<Res, Req>,
 ) {
 
@@ -41,7 +41,7 @@ abstract class ApiDispatchCommand<Res, Req>(
         apiContext.coroutineScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    apiCall?.invoke() ?: throw LocalRequestErrorException()
+                    apiCall(apiContext.request)?.invoke() ?: throw LocalRequestErrorException()
                 }
             }
                 .onSuccess {
