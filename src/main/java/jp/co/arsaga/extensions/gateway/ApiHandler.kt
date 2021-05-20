@@ -37,7 +37,7 @@ abstract class ApiDispatchCommand<Res, Req>(
         Timber.e("abstractApiDispatch:onFailureError!:${response.message} ${response.cause}")
     }
 
-    init {
+    fun fetch() {
         apiContext.coroutineScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
@@ -52,5 +52,9 @@ abstract class ApiDispatchCommand<Res, Req>(
                     serverFallback(it)
                 }
         }
+    }
+
+    init {
+        fetch()
     }
 }
