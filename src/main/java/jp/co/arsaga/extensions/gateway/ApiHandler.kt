@@ -8,7 +8,7 @@ import java.lang.Exception
 
 data class ApiContext<Res, Req>(
     val callback: suspend (Res) -> Unit = {},
-    val fallback: suspend (String) -> Unit = {},
+    val fallback: suspend (Response<Res>, json: String) -> Unit = { _, _ -> },
     val serverFallback: suspend (Throwable) -> Unit = {},
     val coroutineScope: CoroutineScope = GlobalScope,
     val request: Req? = null
@@ -27,7 +27,7 @@ abstract class ApiDispatchCommand<Res, Req>(
 
     open suspend fun fallback(response: Response<Res>) {
         response.errorBody()?.string()?.run {
-            apiContext.fallback(this)
+            apiContext.fallback(response, this)
             Timber.e("abstractApiDispatch:onSuccessError!:${this}")
         }
     }
