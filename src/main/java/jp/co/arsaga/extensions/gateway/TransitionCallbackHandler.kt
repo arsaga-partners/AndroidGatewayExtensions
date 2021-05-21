@@ -23,11 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * ApplicationのonCreate時にこのクラスを登録することで最新のActivityがこのクラスに挿入されるようになる。
  */
 
-@SuppressLint("StaticFieldLeak")
-object DefaultTransitionCallbackHandler : TransitionCallbackHandler.Impl() {
-    override val maxSize: Int = 10
-}
-
 interface TransitionCallbackHandler {
     /**
      * @param callback
@@ -66,7 +61,7 @@ interface TransitionCallbackHandler {
 
         private val callbackDeque = ConcurrentLinkedDeque<(Activity) -> Unit>()
 
-        protected abstract val maxSize: Int
+        protected open val maxSize: Int = 10
 
         private val successCallbackNameQueue = object : ConcurrentLinkedQueue<String>() {
             override fun add(element: String?): Boolean {
@@ -120,10 +115,7 @@ interface TransitionCallbackHandler {
             } ?: run { rollback(callback) }
         }
 
-        // FIXME:動作中断の必要があるExceptionを適宜追加していく
-        private fun isSuspend(
-            throwable: Throwable
-        ): Boolean = false
+        open fun isSuspend(throwable: Throwable): Boolean = false
 
         private fun rollback(callback: (Activity) -> Unit) {
             callbackDeque.addFirst(callback)
