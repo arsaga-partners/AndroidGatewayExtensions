@@ -1,6 +1,5 @@
 package jp.co.arsaga.extensions.gateway
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
@@ -29,7 +28,7 @@ interface TransitionCallbackHandler {
      * 画面遷移を実行するラムダ。
      * 第二引数を実行すると直近最大${maxSize}件分の画面遷移ラムダ式のメソッド名リストを取得できる
      */
-    fun post(callback: (Activity, successCallbackNameList: () -> List<String>) -> Unit)
+    fun post(callback: (Activity, successCallbackNameList: () -> Map<String, Long>) -> Unit)
 
     /**
      * @param callback 画面遷移を実行するラムダ
@@ -63,18 +62,21 @@ interface TransitionCallbackHandler {
 
         protected open val maxSize: Int = 10
 
-        private val successCallbackNameQueue = object : ConcurrentLinkedQueue<String>() {
-            override fun add(element: String?): Boolean {
-                (size - maxSize)
-                    .takeIf { it > 0 }
-                    ?.run { repeat(this) { poll() } }
-                return super.add(element)
+        private val successCallbackNameQueue =
+            object : ConcurrentLinkedQueue<Pair<String, Long>>() {
+                override fun add(element: Pair<String, Long>?): Boolean {
+                    (size - maxSize)
+                        .takeIf { it > 0 }
+                        ?.run { repeat(this) { poll() } }
+                    return super.add(element)
+                }
             }
-        }
 
-        override fun post(callback: (Activity, successCallbackNameList: () -> List<String>) -> Unit) {
+        override fun post(
+            callback: (Activity, successCallbackNameList: () -> Map<String, Long>) -> Unit
+        ) {
             post { activity ->
-                callback(activity) { successCallbackNameQueue.toList() }
+                callback(activity) { successCallbackNameQueue.toMap() }
             }
         }
 
@@ -103,7 +105,10 @@ interface TransitionCallbackHandler {
                 runCatching {
                     callback(it)
                 }.onSuccess {
-                    successCallbackNameQueue.add(callback.javaClass.name)
+                    Pair(
+                        callback.javaClass.name,
+                        System.currentTimeMillis()
+                    ).run(successCallbackNameQueue::add)
                     onNext()
                 }.onFailure {
                     Timber.e(it)
