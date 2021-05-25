@@ -14,7 +14,7 @@ data class ApiContext<Res, Req>(
     val request: Req? = null
 )
 
-class LocalRequestErrorException : Exception()
+class LocalRequestErrorException : Exception("リクエストパラメータが不正です")
 
 abstract class ApiDispatchCommand<Res, Req>(
     private val apiCall: (Req?) -> (suspend () -> Response<Res>)?,
@@ -28,13 +28,13 @@ abstract class ApiDispatchCommand<Res, Req>(
     open suspend fun fallback(response: Response<Res>) {
         response.errorBody()?.string()?.run {
             apiContext.fallback(response, this)
-            Timber.e("abstractApiDispatch:onSuccessError!:${this}")
+            Timber.e("abstractApiDispatch:onSuccessError!:${apiCall.javaClass.name}:${this}")
         }
     }
 
     open suspend fun serverFallback(response: Throwable) {
         apiContext.serverFallback(response)
-        Timber.e("abstractApiDispatch:onFailureError!:${response.message} ${response.cause}")
+        Timber.e("abstractApiDispatch:onFailureError!:${apiCall.javaClass.name}:${response.message} ${response.cause}")
     }
 
     fun fetch() {
