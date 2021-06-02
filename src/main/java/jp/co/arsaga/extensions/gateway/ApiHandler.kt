@@ -42,15 +42,13 @@ abstract class ApiDispatchCommand<Res, Req>(
             runCatching {
                 withContext(Dispatchers.IO) {
                     apiCall(apiContext.request)?.invoke() ?: throw LocalRequestErrorException()
-                }
-            }
-                .onSuccess {
+                }.also {
                     if (it.isSuccessful) callBack(it)
                     else fallback(it)
                 }
-                .onFailure {
-                    serverFallback(it)
-                }
+            }.onFailure {
+                serverFallback(it)
+            }
         }
     }
 
