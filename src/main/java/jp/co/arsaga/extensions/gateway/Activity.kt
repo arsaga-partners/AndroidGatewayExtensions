@@ -7,8 +7,17 @@ import android.os.Looper
 
 
 fun Activity.startLaunchActivity(transitionAnimation: ((Activity) -> Unit)? = null) {
+    startLaunchActivity(transitionAnimation) {
+        isCurrentLaunchActivity(it) == false
+    }
+}
+
+fun Activity.startLaunchActivity(
+    transitionAnimation: ((Activity) -> Unit)? = null,
+    isPossibleTransition: (launchIntent: Intent?) -> Boolean
+) {
     packageManager.getLaunchIntentForPackage(packageName)
-        ?.takeIf { isCurrentLaunchActivity(it) == false }
+        ?.takeIf { isPossibleTransition(it) }
         ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         ?.let {
             Handler(Looper.getMainLooper()).post {
