@@ -7,14 +7,14 @@ import android.os.Looper
 
 
 fun Activity.startLaunchActivity(transitionAnimation: ((Activity) -> Unit)? = null) {
-    startLaunchActivity(transitionAnimation) {
+    startLaunchActivity( {
         isCurrentLaunchActivity(it) == false
-    }
+    }, transitionAnimation)
 }
 
 fun Activity.startLaunchActivity(
-    transitionAnimation: ((Activity) -> Unit)? = null,
-    isPossibleTransition: (launchIntent: Intent?) -> Boolean
+    isPossibleTransition: (launchIntent: Intent?) -> Boolean,
+    transitionAnimation: ((Activity) -> Unit)? = null
 ) {
     packageManager.getLaunchIntentForPackage(packageName)
         ?.takeIf { isPossibleTransition(it) }
