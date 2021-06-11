@@ -33,7 +33,9 @@ abstract class AbstractApiClient<IApiType> {
 
     protected open fun setRefreshToken(continuation: Continuation<Request.Builder?>, requestBuilder: Request.Builder): Request.Builder? = requestBuilder
 
+    @Deprecated("より情報量の多いメソッドに変更してください", ReplaceWith("onTokenRefreshError(response)"))
     protected open fun onTokenRefreshError() {}
+    protected open fun onTokenRefreshError(response: Response) {}
 
     protected abstract val maxRetryCount: Int
 
@@ -50,6 +52,7 @@ abstract class AbstractApiClient<IApiType> {
                     else {
                         Timber.d("Auth::refreshTokenError")
                         onTokenRefreshError()
+                        onTokenRefreshError(it)
                         null
                     }
                 }
