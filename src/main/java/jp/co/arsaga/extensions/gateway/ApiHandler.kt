@@ -19,6 +19,7 @@ class LocalRequestErrorException : Exception("リクエストパラメータが�
 abstract class ApiDispatchCommand<Res, Req>(
     private val apiCall: (Req?) -> (suspend () -> Response<Res>)?,
     private val apiContext: ApiContext<Res, Req>,
+    private val connectingApiStatus: ConnectingApiStatus? = ConnectingApiStatus.Default
 ) {
 
     open suspend fun callBack(response: Response<Res>) {
@@ -38,15 +39,18 @@ abstract class ApiDispatchCommand<Res, Req>(
     }
 
     fun fetch() {
+        connectingApiStatus?.startApi(this)
         apiContext.coroutineScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
                     apiCall(apiContext.request)?.invoke() ?: throw LocalRequestErrorException()
                 }.also {
+                    connectingApiStatus?.finishApi(this@ApiDispatchCommand)
                     if (it.isSuccessful) callBack(it)
                     else fallback(it)
                 }
             }.onFailure {
+                connectingApiStatus?.finishApi(this@ApiDispatchCommand)
                 serverFallback(it)
             }
         }
