@@ -112,10 +112,8 @@ interface TransitionCallbackHandler {
                     onNext()
                 }.onFailure {
                     Timber.e(it)
-                    when (it) {
-                        ::isSuspend -> rollback(callback)
-                        else -> onNext()
-                    }
+                    if (isSuspend(it)) rollback(callback)
+                    else onNext()
                 }
             } ?: run { rollback(callback) }
         }
