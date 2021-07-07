@@ -22,6 +22,8 @@ abstract class ApiDispatchCommand<Res, Req>(
     private val connectingApiStatus: ConnectingApiStatus? = ConnectingApiStatus.Default
 ) {
 
+    protected var fetchTimestamp: Long? = null
+
     open suspend fun callBack(response: Response<Res>) {
         response.body()?.run { apiContext.callback(this) }
     }
@@ -39,6 +41,7 @@ abstract class ApiDispatchCommand<Res, Req>(
     }
 
     fun fetch() {
+        fetchTimestamp = System.currentTimeMillis()
         connectingApiStatus?.startApi(this)
         apiContext.coroutineScope.launch {
             runCatching {
